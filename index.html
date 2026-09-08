@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TJ NewsGen · Full Bulletin Engine v2.4 (Claude + Gemini + OpenAI + Groq)</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F0F2F5;--surface:#FFF;--surface2:#F5F7FA;--surface3:#EBEEf2;
+  --line:#DDE1E8;--line-soft:#E8EBF0;
+  --ink:#111827;--ink-dim:#4B5563;--ink-faint:#9CA3AF;
+  --red:#DC2626;--red-h:#B91C1C;--red-l:#FEF2F2;--red-b:#FECACA;
+  --amber:#D97706;--amber-l:#FFFBEB;--amber-b:#FDE68A;
+  --green:#059669;--green-l:#ECFDF5;--green-b:#A7F3D0;
+  --cyan:#0284C7;--cyan-l:#EFF6FF;--cyan-b:#BAE6FD;
+  --violet:#7C3AED;--violet-l:#F5F3FF;--violet-b:#DDD6FE;
+  --mono:'IBM Plex Mono','SF Mono',Consolas,monospace;
+  --ui:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+  --tamil:'Nirmala UI','Noto Sans Tamil',Latha,'Segoe UI',sans-serif;
+  --r:8px;--sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+  --sh-md:0 4px 6px rgba(0,0,0,.06),0 2px 4px rgba(0,0,0,.05);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:14px;display:flex;flex-direction:column}
+button{font-family:var(--ui);cursor:pointer}
+::selection{background:rgba(2,132,199,.15)}
+
+.topbar{display:flex;align-items:center;gap:12px;height:52px;padding:0 18px;background:var(--surface);border-bottom:1px solid var(--line);flex-shrink:0;box-shadow:var(--sh)}
+.brand{display:flex;align-items:center;gap:9px;margin-right:4px}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 8px rgba(220,38,38,.5);animation:pulse 2.4s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.brand h1{font-size:15px;font-weight:700}
+.brand h1 span{color:var(--red)}
+.brand .sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--ink-faint);padding:2px 7px;background:var(--surface2);border:1px solid var(--line);border-radius:4px}
+.nav-pills{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.np{border:none;background:none;color:var(--ink-dim);font-size:12.5px;font-weight:600;padding:6px 14px;border-radius:7px;transition:.15s;white-space:nowrap}
+.np:hover:not(.on){color:var(--ink);background:var(--surface3)}
+.np.on{background:var(--red);color:#fff;box-shadow:0 1px 4px rgba(220,38,38,.3)}
+.mode-seg{display:flex;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:3px;margin-left:4px}
+.ms{border:none;background:none;color:var(--ink-dim);font-size:12px;font-weight:600;padding:6px 14px;border-radius:7px;transition:.15s}
+.ms.on{background:var(--ink);color:#fff}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.status-pill{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:.8px;padding:5px 10px;border-radius:20px;border:1px solid var(--line);color:var(--ink-faint);background:var(--surface2)}
+.status-pill .led{width:6px;height:6px;border-radius:50%;background:var(--ink-faint)}
+.status-pill.ok{border-color:rgba(5,150,105,.3);color:var(--green);background:var(--green-l)}
+.status-pill.ok .led{background:var(--green);box-shadow:0 0 5px rgba(5,150,105,.5)}
+.status-pill.err{border-color:rgba(220,38,38,.3);color:var(--red);background:var(--red-l)}
+.status-pill.err .led{background:var(--red)}
+
+#apiBar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:#FFFBEB;border-bottom:1px solid #FDE68A;flex-shrink:0;flex-wrap:wrap}
+#apiBar label{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:#D97706;font-weight:600;white-space:nowrap}
+#apiBar select,#apiBar input{background:#fff;border:1px solid #FDE68A;border-radius:6px;color:#111827;padding:7px 10px;font-size:13px}
+#apiBar input{flex:1;min-width:180px;font-family:var(--mono);font-size:12px}
+#apiBar button{padding:7px 16px;border:none;border-radius:6px;background:#D97706;color:#fff;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap}
+#providerHint{font-size:11px;color:#D97706;white-space:nowrap}
+
+.workspace{flex:1;overflow:hidden;position:relative}
+.page{position:absolute;inset:0;display:none;overflow:hidden}
+.page.on{display:flex}
+
+#pg-newsgen{flex-direction:row}
+.rail{width:370px;flex-shrink:0;border-right:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;overflow:hidden}
+.rail-scroll{flex:1;overflow-y:auto;padding:16px}
+.step{margin-bottom:16px}
+.step-hd{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.step-hd .num{width:19px;height:19px;border-radius:50%;background:var(--red);color:#fff;font-family:var(--mono);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-hd .lbl{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.8px;color:var(--ink-dim)}
+.seg-ctrl{display:flex;gap:5px;margin-bottom:10px}
+.sc{flex:1;padding:8px 4px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface2);color:var(--ink-dim);font-size:12px;font-weight:600;transition:.15s}
+.sc:hover{border-color:var(--ink-dim);color:var(--ink)}
+.sc.on{background:var(--red-l);border-color:var(--red-b);color:var(--red)}
+textarea,input[type=number],input[type=text],select{width:100%;background:var(--surface2);border:1px solid var(--line);border-radius:var(--r);color:var(--ink);padding:10px 12px;font-size:14px;font-family:var(--tamil);transition:border-color .15s}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--cyan);background:#fff}
+textarea{resize:vertical;min-height:110px;line-height:1.7}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 12px;border:1px solid var(--line);border-radius:20px;background:var(--surface2);color:var(--ink-dim);font-size:12px;font-weight:500;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--ink-dim);color:var(--ink)}
+.chip.on{border-color:var(--amber-b);color:var(--amber);background:var(--amber-l)}
+.chip.f.on{border-color:var(--cyan-b);color:var(--cyan);background:var(--cyan-l)}
+.dur-row{display:flex;gap:8px;align-items:center}
+.dur-row input{width:76px;text-align:center;font-family:var(--mono)}
+.dur-q{display:flex;gap:5px}
+.dq{padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface2);color:var(--ink-dim);font-family:var(--mono);font-size:11px;transition:.15s}
+.dq:hover{color:var(--cyan);border-color:var(--cyan)}
+.dur-est{font-family:var(--mono);font-size:10px;color:var(--ink-faint);margin-top:6px}
+.img-drop{position:relative;border:2px dashed var(--line);border-radius:var(--r);background:var(--surface2);text-align:center;padding:20px 12px;cursor:pointer;transition:.2s}
+.img-drop:hover{border-color:var(--cyan);background:var(--cyan-l)}
+.img-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-drop .ico{font-size:26px;margin-bottom:6px}
+.img-drop .t{font-size:13px;color:var(--ink-dim);font-weight:500}
+.img-drop .s{font-size:11px;color:var(--ink-faint);margin-top:3px}
+#imgPreview{margin-top:10px;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);display:none}
+#imgPreview img{width:100%;display:block;max-height:160px;object-fit:cover}
+.src-note{font-size:11px;color:var(--ink-faint);margin-top:7px;line-height:1.5;padding:7px 10px;background:var(--surface2);border-radius:6px;border-left:2px solid var(--line)}
+.rail-foot{padding:12px 16px;border-top:1px solid var(--line);background:var(--surface);flex-shrink:0}
+.btn-primary{width:100%;padding:12px;border:none;border-radius:10px;background:var(--red);color:#fff;font-size:14px;font-weight:700;letter-spacing:.3px;transition:.15s;box-shadow:0 2px 8px rgba(220,38,38,.25)}
+.btn-primary:hover{background:var(--red-h);transform:translateY(-1px);box-shadow:0 4px 12px rgba(220,38,38,.3)}
+.btn-primary:disabled{background:#9CA3AF;cursor:wait;transform:none;box-shadow:none}
+
+.stage{flex:1;background:var(--bg);overflow-y:auto;display:flex;flex-direction:column}
+.stage-head{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--surface);box-shadow:var(--sh);flex-shrink:0}
+.stage-head .t{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:2px;color:var(--ink-dim)}
+.stage-acts{margin-left:auto;display:flex;gap:7px}
+.btn{padding:7px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink-dim);font-size:12px;font-weight:600;transition:.15s;display:inline-flex;align-items:center;gap:5px;box-shadow:var(--sh)}
+.btn:hover{color:var(--ink);border-color:var(--ink-dim)}
+.btn.red{border-color:var(--red-b);color:var(--red);background:var(--red-l)}
+.btn.red:hover{background:var(--red);color:#fff}
+.stage-body{padding:18px;max-width:900px;width:100%}
+
+.empty{margin:50px auto;max-width:520px;text-align:center}
+.empty .mark{font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--ink-faint);margin-bottom:18px}
+.flow-steps{display:flex}
+.fs{flex:1;padding:14px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--sh)}
+.fs:first-child{border-radius:10px 0 0 10px}
+.fs:last-child{border-radius:0 10px 10px 0}
+.fs+.fs{border-left:none}
+.fs .n{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--red);margin-bottom:5px;font-weight:600}
+.fs .d{font-size:12px;color:var(--ink-dim);line-height:1.5}
+.empty .note{margin-top:12px;font-size:11px;color:var(--ink-faint)}
+
+.slugstrip{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--red);border-radius:10px;padding:12px 15px;margin-bottom:12px;box-shadow:var(--sh)}
+.slugstrip .slug{font-family:var(--mono);font-size:13px;font-weight:600}
+.slugstrip .btype{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--amber);border:1px solid var(--amber-b);border-radius:5px;padding:2px 8px;background:var(--amber-l)}
+.slugstrip .dur{margin-left:auto;font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)}
+.slugstrip .dur small{font-size:9px;color:var(--ink-faint);letter-spacing:1.5px;display:block;text-align:right}
+.sec{background:var(--surface);border:1px solid var(--line-soft);border-radius:10px;margin-bottom:10px;overflow:hidden;box-shadow:var(--sh)}
+.sec-hd{display:flex;align-items:center;gap:8px;padding:8px 13px;border-bottom:1px solid var(--line-soft);background:var(--surface2)}
+.rtag{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1.3px;padding:3px 9px;border-radius:5px}
+.rt-ANCHOR{background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b)}
+.rt-VO{background:var(--cyan-l);color:var(--cyan);border:1px solid var(--cyan-b)}
+.rt-BYTE{background:var(--green-l);color:var(--green);border:1px solid var(--green-b)}
+.rt-MOS{background:var(--violet-l);color:var(--violet);border:1px solid var(--violet-b)}
+.rt-TICKER{background:#FFF7ED;color:#C2410C;border:1px solid #FED7AA}
+.rt-RDR,.rt-BREATHER{background:var(--violet-l);color:var(--violet);border:1px solid var(--violet-b)}
+.rt-PKG{background:var(--red-l);color:var(--red);border:1px solid var(--red-b)}
+.sec-hd .sdur{font-family:var(--mono);font-size:10px;color:var(--ink-faint)}
+.cpybtn{margin-left:auto;border:1px solid var(--line);background:var(--surface);color:var(--ink-dim);border-radius:6px;padding:4px 11px;font-size:11px;transition:.15s}
+.cpybtn:hover{color:var(--cyan);border-color:var(--cyan)}
+.cpybtn.done{color:var(--green);border-color:var(--green-b);background:var(--green-l)}
+.sec-body{padding:13px 15px;font-family:var(--tamil);font-size:15px;line-height:1.85;white-space:pre-wrap}
+.sec-body .cue{font-family:var(--mono);font-size:11px;color:var(--green);display:block;margin-top:8px;padding:4px 8px;background:var(--green-l);border-radius:4px}
+.mos-block{padding:13px 15px}
+.mos-sent{font-family:var(--tamil);font-size:15px;font-weight:600;line-height:1.7;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line-soft)}
+.ticker-hd{font-family:var(--tamil);font-size:14px;font-weight:700;padding:9px 12px;background:var(--amber-l);border-radius:6px;border-left:3px solid var(--amber);margin-bottom:8px}
+.ticker-pts{list-style:none}
+.ticker-pts li{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--line-soft);font-family:var(--tamil);font-size:14px;line-height:1.6;color:var(--ink-dim)}
+.ticker-pts li:last-child{border-bottom:none}
+.ticker-pts li::before{content:'▶';color:var(--red);font-size:9px;flex-shrink:0;margin-top:5px}
+.stat-row{display:flex;gap:10px;margin-bottom:14px}
+.stat{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;box-shadow:var(--sh)}
+.stat .v{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--green)}
+.stat .l{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--ink-faint);margin-top:4px}
+.removed{border-left:3px solid var(--violet);background:var(--violet-l);border-radius:0 10px 10px 0;padding:10px 13px;font-size:12.5px;color:var(--ink-dim);margin-top:10px;line-height:1.6}
+.spinner-wrap{padding:60px 0;text-align:center}
+.spinner{border:3px solid var(--line);border-top-color:var(--red);border-radius:50%;width:32px;height:32px;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-txt{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--ink-dim)}
+.error-box{margin:20px auto;max-width:540px;border:1px solid var(--red-b);background:var(--red-l);border-radius:10px;padding:15px 17px;font-size:13px;line-height:1.7;color:#991B1B}
+.error-box b{color:var(--red)}
+
+/* Transcriber */
+#pg-transcriber{background:var(--bg);overflow-y:auto;flex-direction:column;align-items:center}
+.t-wrap{width:100%;max-width:780px;padding:24px 20px 60px}
+.t-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.t-sub{font-size:13px;color:var(--ink-dim);margin-bottom:22px}
+.tpanel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:16px;box-shadow:var(--sh)}
+.tpanel h2{font-family:var(--mono);font-size:10px;letter-spacing:1.8px;font-weight:600;color:var(--ink-dim);text-transform:uppercase;margin-bottom:16px}
+.t-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.t-field{flex:1;min-width:140px}
+.t-field label{display:block;font-size:11.5px;color:var(--ink-dim);margin-bottom:5px;font-weight:500}
+.dz{border:2px dashed var(--line);border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;transition:.2s;background:var(--surface2);position:relative}
+.dz:hover,.dz.drag{border-color:var(--cyan);background:var(--cyan-l)}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz .ico{font-size:28px;margin-bottom:8px;color:var(--ink-faint)}
+.dz .mt{font-size:14px;color:var(--ink-dim);font-weight:500}
+.dz .st{font-size:11.5px;color:var(--ink-faint);margin-top:4px}
+.t-fname{font-family:var(--mono);font-size:11.5px;color:var(--green);margin-top:8px;word-break:break-all;font-weight:500;min-height:16px}
+.t-run{width:100%;background:var(--green);border:none;color:#fff;padding:12px;border-radius:8px;font-family:var(--mono);font-size:13px;letter-spacing:.8px;font-weight:600;margin-top:12px;box-shadow:0 2px 8px rgba(5,150,105,.25)}
+.t-run:hover:not(:disabled){background:#047857}
+.t-run:disabled{opacity:.4;cursor:not-allowed}
+.t-status{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);min-height:16px;margin-top:10px}
+.t-status.active{color:var(--amber)}.t-status.done{color:var(--green)}.t-status.err{color:var(--red)}
+.t-box{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:16px;font-size:15px;line-height:1.8;white-space:pre-wrap;max-height:320px;overflow-y:auto;font-family:var(--tamil);margin-top:12px}
+.t-copy-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.t-copy-row button{padding:8px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink-dim);font-size:12.5px;font-weight:500}
+.t-copy-row button:hover{color:var(--cyan);border-color:var(--cyan)}
+.t-note{font-size:12px;color:var(--ink-faint);text-align:center;margin-top:20px;line-height:1.6;padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--line)}
+
+/* Monitor */
+#pg-monitor{background:var(--bg);overflow-y:auto;flex-direction:column}
+.mon-wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px;width:100%}
+.mon-title{font-size:18px;font-weight:700;margin-bottom:12px}
+.mon-empty{text-align:center;padding:60px 20px;color:var(--ink-faint);font-size:13px;font-family:var(--mono)}
+
+.footbar{height:30px;padding:0 18px;border-top:1px solid var(--line);background:var(--surface);display:flex;align-items:center;font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--ink-faint);flex-shrink:0;gap:16px}
+.footbar .r{margin-left:auto}
+#selBadge{position:fixed;bottom:38px;right:14px;z-index:99;display:none;background:var(--ink);color:#fff;border-radius:7px;padding:6px 12px;font-family:var(--mono);font-size:12px;font-weight:600;box-shadow:var(--sh-md);pointer-events:none}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="dot"></div>
+    <h1>TJ <span>NewsGen</span></h1>
+    <div class="sub">v2.4 FULL · GROQ READY</div>
+  </div>
+  <div class="nav-pills">
+    <button class="np on" id="nav-newsgen" onclick="gotoPage('newsgen')">⏺ Script Generator</button>
+    <button class="np" id="nav-transcriber" onclick="gotoPage('transcriber')" style="background:none;color:var(--ink-dim)">🎙 Transcriber</button>
+    <button class="np" id="nav-monitor" onclick="gotoPage('monitor')" style="background:none;color:var(--ink-dim);border-left:1px solid var(--line);margin-left:4px">🌍 World Monitor</button>
+  </div>
+  <div class="mode-seg" id="modeSeg">
+    <button class="ms on" id="ms-gen" onclick="setMode('generate')">Generate</button>
+    <button class="ms" id="ms-trim" onclick="setMode('trim')">Trim to Time</button>
+  </div>
+  <div class="topbar-right"></div>
+</header>
+
+<div id="apiBar">
+  <label>PROVIDER</label>
+  <select id="apiProvider" onchange="updateProviderHint()">
+    <option value="claude">Claude (Anthropic)</option>
+    <option value="gemini">Gemini (Google)</option>
+    <option value="openai">ChatGPT (OpenAI)</option>
+    <option value="groq" selected>Groq — very fast + free tier</option>
+  </select>
+  <input type="password" id="apiKey" placeholder="gsk_...">
+  <button onclick="saveKey()">Save</button>
+  <span id="providerHint">console.groq.com → API Keys</span>
+  <div class="status-pill err" id="apiPill" style="margin-left:auto"><span class="led"></span><span id="apiTxt">KEY NEEDED</span></div>
+</div>
+
+<div class="workspace">
+
+  <!-- NEWSGEN -->
+  <div class="page on" id="pg-newsgen">
+    <aside class="rail">
+      <div class="rail-scroll">
+        <div id="pane-gen">
+          <div class="step">
+            <div class="step-hd"><span class="num">1</span><span class="lbl">SOURCE</span></div>
+            <div class="seg-ctrl">
+              <button class="sc on" data-src="raw" onclick="setSrc('raw')">Raw script</button>
+              <button class="sc" data-src="url" onclick="setSrc('url')">Link / URL</button>
+              <button class="sc" data-src="img" onclick="setSrc('img')">Newspaper Image</button>
+            </div>
+            <div id="src-raw"><textarea id="rawScript" placeholder="Reporter script / spot copy — Tamil or English"></textarea></div>
+            <div id="src-url" style="display:none">
+              <input type="text" id="newsUrl" placeholder="https://article-link...">
+              <div class="src-note">Article facts only will be used.</div>
+            </div>
+            <div id="src-img" style="display:none">
+              <div class="img-drop">
+                <input type="file" id="paperImg" accept="image/*" onchange="loadImg(this)">
+                <div class="ico">📰</div>
+                <div class="t">Newspaper image select பண்ணுங்க</div>
+                <div class="s">Clear photo · one article in frame</div>
+              </div>
+              <div id="imgPreview"><img id="imgPrevImg" src="" alt=""></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-hd"><span class="num">2</span><span class="lbl">BULLETIN TYPE</span></div>
+            <div class="chips" id="btChips">
+              <div class="chip on" data-v="General News">General News</div>
+              <div class="chip" data-v="Top 50">Top 50</div>
+              <div class="chip" data-v="Prime News">Prime News</div>
+              <div class="chip" data-v="3-Minute Stories">3-Min Stories</div>
+              <div class="chip" data-v="Breaking News">Breaking</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-hd"><span class="num">3</span><span class="lbl">FORMAT STRUCTURE</span></div>
+            <div class="chips" id="fmtChips">
+              <div class="chip f on" data-v="VO">VO</div>
+              <div class="chip f" data-v="VO BREATH">VO Breath</div>
+              <div class="chip f" data-v="VO + BYTE">VO + Byte</div>
+              <div class="chip f" data-v="HL">HL</div>
+              <div class="chip f" data-v="Anchor Read (RDR)">RDR</div>
+              <div class="chip f" data-v="Package (PKG)">PKG</div>
+              <div class="chip f" data-v="MINI TALKS">Mini Talks</div>
+              <div class="chip f" data-v="ONE MINUTE">One Minute</div>
+              <div class="chip f" data-v="Breather">Breather</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-hd"><span class="num">4</span><span class="lbl">TARGET DURATION</span></div>
+            <div class="dur-row">
+              <input type="number" id="targetDur" value="40" min="8" max="300">
+              <span style="font-family:var(--mono);font-size:11px;color:var(--ink-faint)">sec</span>
+              <div class="dur-q">
+                <button class="dq" onclick="setDur(20)">20</button>
+                <button class="dq" onclick="setDur(40)">40</button>
+                <button class="dq" onclick="setDur(60)">60</button>
+                <button class="dq" onclick="setDur(100)">100</button>
+              </div>
+            </div>
+            <div class="dur-est">≈ <span id="wEst">70</span> Tamil words · 1.75 w/s</div>
+          </div>
+          <div class="step">
+            <div class="step-hd"><span class="num">5</span><span class="lbl">INSTRUCTIONS (OPTIONAL)</span></div>
+            <textarea id="genInstr" style="min-height:56px" placeholder="Eg: Collector byte highlight, location first..."></textarea>
+          </div>
+        </div>
+        <div id="pane-trim" style="display:none">
+          <div class="step">
+            <div class="step-hd"><span class="num">1</span><span class="lbl">EXISTING TAMIL SCRIPT</span></div>
+            <textarea id="trimScript" style="min-height:200px" placeholder="Full script paste பண்ணுங்க..."></textarea>
+          </div>
+          <div class="step">
+            <div class="step-hd"><span class="num">2</span><span class="lbl">TRIM TO DURATION</span></div>
+            <div class="dur-row">
+              <input type="number" id="trimDur" value="30" min="8" max="300">
+              <span style="font-family:var(--mono);font-size:11px;color:var(--ink-faint)">sec</span>
+              <div class="dur-q">
+                <button class="dq" onclick="setTrimDur(20)">20</button>
+                <button class="dq" onclick="setTrimDur(30)">30</button>
+                <button class="dq" onclick="setTrimDur(40)">40</button>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-hd"><span class="num">3</span><span class="lbl">INSTRUCTIONS (OPTIONAL)</span></div>
+            <textarea id="trimInstr" style="min-height:56px" placeholder="Eg: statistics retain, quotes shorten..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="rail-foot">
+        <button class="btn-primary" id="goBtn" onclick="go()">⏺ &nbsp;GENERATE SCRIPT</button>
+      </div>
+    </aside>
+    <main class="stage">
+      <div class="stage-head">
+        <span class="t" id="stageTitle">RUNDOWN OUTPUT</span>
+        <div class="stage-acts" id="stageActs"></div>
+      </div>
+      <div class="stage-body" id="output">
+        <div class="empty">
+          <div class="mark">— STANDBY —</div>
+          <div class="flow-steps">
+            <div class="fs"><div class="n">STEP 1</div><div class="d">Raw script, link or newspaper image</div></div>
+            <div class="fs"><div class="n">STEP 2</div><div class="d">Bulletin type, format, duration</div></div>
+            <div class="fs"><div class="n">STEP 3</div><div class="d">Generate → copy blocks → paste in Blaze</div></div>
+          </div>
+          <div class="note">TamilJanam house style · Full multi-provider (Claude · Gemini · OpenAI · Groq)</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- TRANSCRIBER -->
+  <div class="page" id="pg-transcriber">
+    <div class="t-wrap">
+      <div class="t-title">🎙 Transcriber</div>
+      <div class="t-sub">Upload audio → Transcribe with Whisper (on-device) → Optional translate via your selected provider</div>
+      <div class="tpanel">
+        <h2>Settings</h2>
+        <div class="t-row">
+          <div class="t-field">
+            <label>Spoken language</label>
+            <select id="tSpokenLang">
+              <option value="auto">Auto-detect</option>
+              <option value="ta">Tamil</option>
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+            </select>
+          </div>
+          <div class="t-field">
+            <label>Output language</label>
+            <select id="tOutputLang">
+              <option value="same">Same as spoken</option>
+              <option value="ta">Translate to Tamil (via API)</option>
+              <option value="en">Translate to English (via API)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="tpanel">
+        <h2>Upload Audio</h2>
+        <div class="dz" id="dz">
+          <input type="file" id="tFile" accept="audio/*">
+          <div class="ico">🎙</div>
+          <div class="mt">Click to choose audio or drag here</div>
+          <div class="st">MP3 · WAV · M4A · OGG</div>
+        </div>
+        <div class="t-fname" id="tFname"></div>
+        <button class="t-run" id="tRunBtn" disabled>▶ TRANSCRIBE</button>
+        <div class="t-status" id="tStatus"></div>
+        <div id="tOutArea" style="display:none">
+          <div class="t-box" id="tBox"></div>
+          <div class="t-copy-row">
+            <button onclick="copyTranscript()">📋 Copy</button>
+            <button onclick="sendToNewsGen()">⏩ Send to NewsGen</button>
+          </div>
+        </div>
+      </div>
+      <div class="t-note">Whisper runs on your device. Translation uses your selected API provider (Claude / Gemini / OpenAI / Groq).</div>
+    </div>
+  </div>
+
+  <!-- MONITOR -->
+  <div class="page" id="pg-monitor">
+    <div class="mon-wrap">
+      <div class="mon-title">🌍 World Monitor</div>
+      <div class="mon-empty">
+        Multi-RSS World Monitor is available in the original large build.<br>
+        This full v2.4 prioritises Script Generator + Transcriber + Groq.<br><br>
+        You can still paste any news into the Script Generator and generate immediately.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footbar">
+  <span>TJ NEWSGEN v2.4 FULL · CLAUDE · GEMINI · OPENAI · GROQ</span>
+  <span>1.75 W/S · TAMILJANAM HOUSE STYLE</span>
+  <span class="r">SELECT TEXT → WORD COUNT</span>
+</footer>
+<div id="selBadge"></div>
+
+<script type="module">
+import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+env.allowLocalModels = false;
+
+const WPS = 1.75;
+
+/* ══ SYSTEM PROMPTS ══ */
+const SYS = `You are the senior output editor of TamilJanam, a Tamil TV news channel. You write broadcast-ready Tamil news scripts (NRCS rundown style) strictly in TamilJanam HOUSE STYLE.
+
+TAMILJANAM HOUSE STYLE:
+- Body length: 4-6 sentences. Ruthlessly compress.
+- LEAD: open with the outcome / latest development + place.
+- Pure Tamil preference: கும்பாபிஷேகம் → குடமுழுக்கு.
+- ALWAYS DROP: department names, procedural details, lists of dignitaries, viral framing, speculation.
+- ALWAYS KEEP: place hierarchy, exact numbers, names with designation.
+- Connectors: அதன்படி, / அதைத் தொடர்ந்து, / இதனையடுத்து.
+- Controversy: neutral facts + "...அதிர்ச்சியையும் சர்ச்சையையும் ஏற்படுத்தி உள்ளது".
+- CONNECTOR RULE: join same-speaker statements with "...என்றும்", "...எனவும்" and close with என்றார் / என தெரிவித்தார்.
+
+FORMAT TEMPLATES:
+- VO / VO BREATH / VO + BYTE / HL / RDR / PKG / MINI TALKS / ONE MINUTE / BREATHER — follow exact structure.
+- Read pace: 1.75 Tamil words per second.
+- slug: [FORMAT] [LOCATION CODE] - [SUBJECT]
+- mos_slug: one complete Tamil sentence.
+- Never fabricate facts.
+
+Respond ONLY with valid JSON:
+{"slug":"","mos_slug":"","bulletin_type":"","anchor_lead":"","segments":[{"type":"VO|BYTE|RDR|PKG|BREATHER","speaker":"","text":"","byte_in":"","byte_out":"","duration_sec":0}],"ticker":"HEADER||Point1||Point2","ticker_header":"","ticker_points":["",""],"total_duration_sec":0,"editor_note":""}`;
+
+const SYS_TRIM = `You are the senior output editor of TamilJanam. Trim a Tamil broadcast script to target duration without losing meaning.
+Rules: 1.75 words/sec. Preserve core facts, names, numbers. Cut repetition and filler. Keep natural spoken Tamil. Use proper connectors.
+Respond ONLY with valid JSON:
+{"trimmed_script":"","original_words":0,"trimmed_words":0,"est_duration_sec":0,"removed_summary":""}`;
+
+/* ══ NAV ══ */
+function gotoPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pg-'+id)?.classList.add('on');
+  ['newsgen','transcriber','monitor'].forEach(n=>{
+    const btn=document.getElementById('nav-'+n);
+    if(!btn) return;
+    btn.style.cssText = n===id
+      ? (n==='newsgen'?'background:var(--red);color:#fff':n==='transcriber'?'background:var(--green);color:#fff':'background:#7C3AED;color:#fff')
+      : 'background:none;color:var(--ink-dim)';
+  });
+  document.getElementById('modeSeg').style.display = id==='newsgen'?'flex':'none';
+}
+window.gotoPage = gotoPage;
+
+/* ══ PROVIDERS ══ */
+const getKey=()=>document.getElementById('apiKey').value.trim();
+const getProvider=()=>document.getElementById('apiProvider').value;
+const PROVIDER_HINTS={claude:'console.anthropic.com → API Keys',gemini:'aistudio.google.com → Get API Key',openai:'platform.openai.com → API Keys',groq:'console.groq.com → API Keys'};
+const PROVIDER_MODELS={claude:'claude-sonnet-4-6',gemini:'gemini-2.0-flash',openai:'gpt-4o-mini',groq:'llama-3.3-70b-versatile'};
+
+function updateProviderHint(){
+  const p=getProvider();
+  document.getElementById('providerHint').textContent=PROVIDER_HINTS[p]||'';
+  document.getElementById('apiKey').placeholder={claude:'sk-ant-...',gemini:'AIza...',openai:'sk-...',groq:'gsk_...'}[p]||'API key...';
+  setApiStatus();
+}
+window.updateProviderHint=updateProviderHint;
+
+function setApiStatus(){
+  const k=getKey(),p=document.getElementById('apiPill'),t=document.getElementById('apiTxt'),prov=getProvider();
+  const valid=k&&((prov==='claude'&&k.startsWith('sk-ant'))||(prov==='gemini'&&k.startsWith('AIza'))||(prov==='openai'&&k.startsWith('sk-'))||(prov==='groq'&&k.startsWith('gsk_'))||k.length>10);
+  if(valid){p.className='status-pill ok';t.textContent=prov.toUpperCase()+' READY';}
+  else if(k){p.className='status-pill err';t.textContent='KEY INVALID?';}
+  else{p.className='status-pill err';t.textContent='KEY NEEDED';}
+}
+function saveKey(){try{localStorage.setItem('tj_key',getKey());localStorage.setItem('tj_provider',getProvider());}catch(e){}setApiStatus();}
+window.saveKey=saveKey;
+
+window.addEventListener('DOMContentLoaded',()=>{
+  try{const k=localStorage.getItem('tj_key');if(k)document.getElementById('apiKey').value=k;const prov=localStorage.getItem('tj_provider');if(prov)document.getElementById('apiProvider').value=prov;}catch(e){}
+  updateProviderHint();setApiStatus();
+  document.getElementById('targetDur').addEventListener('input',e=>document.getElementById('wEst').textContent=Math.round(e.target.value*WPS));
+  document.getElementById('wEst').textContent=Math.round(40*WPS);
+});
+
+/* ══ MODE / SOURCE ══ */
+let mode='generate',src='raw',imgB64=null,lastOutput=null;
+function setMode(m){
+  mode=m;
+  document.getElementById('ms-gen').classList.toggle('on',m==='generate');
+  document.getElementById('ms-trim').classList.toggle('on',m==='trim');
+  document.getElementById('pane-gen').style.display=m==='generate'?'block':'none';
+  document.getElementById('pane-trim').style.display=m==='trim'?'block':'none';
+  document.getElementById('goBtn').innerHTML=m==='generate'?'⏺ &nbsp;GENERATE SCRIPT':'✂ &nbsp;TRIM SCRIPT';
+  document.getElementById('stageTitle').textContent=m==='generate'?'RUNDOWN OUTPUT':'TRIM OUTPUT';
+}
+window.setMode=setMode;
+function setSrc(s){
+  src=s;
+  document.querySelectorAll('[data-src]').forEach(b=>b.classList.toggle('on',b.dataset.src===s));
+  document.getElementById('src-raw').style.display=s==='raw'?'block':'none';
+  document.getElementById('src-url').style.display=s==='url'?'block':'none';
+  document.getElementById('src-img').style.display=s==='img'?'block':'none';
+}
+window.setSrc=setSrc;
+function setDur(v){document.getElementById('targetDur').value=v;document.getElementById('wEst').textContent=Math.round(v*WPS);}
+window.setDur=setDur;
+function setTrimDur(v){document.getElementById('trimDur').value=v;}
+window.setTrimDur=setTrimDur;
+['btChips','fmtChips'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',e=>{
+    if(!e.target.classList.contains('chip'))return;
+    document.querySelectorAll('#'+id+' .chip').forEach(c=>c.classList.remove('on'));
+    e.target.classList.add('on');
+  });
+});
+const pick=id=>document.querySelector('#'+id+' .chip.on').dataset.v;
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function loadImg(inp){
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=1568;let w=img.width,h=img.height;
+      if(Math.max(w,h)>MAX){const sc=MAX/Math.max(w,h);w=Math.round(w*sc);h=Math.round(h*sc);}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      imgB64=c.toDataURL('image/jpeg',.85).split(',')[1];
+      document.getElementById('imgPrevImg').src='data:image/jpeg;base64,'+imgB64;
+      document.getElementById('imgPreview').style.display='block';
+    };
+    img.src=e.target.result;
+  };
+  r.readAsDataURL(f);
+}
+window.loadImg=loadImg;
+
+/* ══ API CALLS ══ */
+async function callClaude(system,userMsg,useSearch,attempt){
+  const key=getKey(),prov=getProvider();
+  if(!key) throw new Error('API key இல்லை — provider select → key paste → Save');
+  if(prov==='gemini') return _callGemini(system,userMsg,key);
+  if(prov==='openai') return _callOpenAI(system,userMsg,key);
+  if(prov==='groq') return _callGroq(system,userMsg,key);
+  return _callClaude(system,userMsg,useSearch,key,attempt||1);
+}
+
+async function _callClaude(system,userMsg,useSearch,key,attempt){
+  const body={model:PROVIDER_MODELS.claude,max_tokens:4000,system,messages:[{role:'user',content:userMsg}]};
+  if(useSearch) body.tools=[{type:'web_search_20250305',name:'web_search'}];
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify(body)});
+  const data=await r.json();
+  if(data.error) throw new Error(data.error.message||'Claude API error');
+  const text=(data.content||[]).map(i=>i.type==='text'?i.text:'').filter(Boolean).join('\n');
+  try{return parseJson(text);}catch(e){if(attempt<2)return _callClaude(system,userMsg+'\n\nIMPORTANT: ONE valid JSON only.',useSearch,key,attempt+1);throw new Error('JSON parse failed');}
+}
+
+async function _callGemini(system,userMsg,key,attempt=1){
+  const txt=Array.isArray(userMsg)?userMsg.map(b=>b.type==='text'?b.text:'[image]').join('\n'):(typeof userMsg==='string'?userMsg:JSON.stringify(userMsg));
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+PROVIDER_MODELS.gemini+':generateContent?key='+key,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:system+'\n\n'+txt}]}],generationConfig:{maxOutputTokens:4000}})});
+  const data=await r.json();
+  if(data.error) throw new Error('Gemini: '+(data.error.message||'API error'));
+  const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+  try{return parseJson(text);}catch(e){if(attempt<2)return _callGemini(system,userMsg+'\n\nIMPORTANT: ONE valid JSON only.',key,attempt+1);throw new Error('Gemini parse failed');}
+}
+
+async function _callOpenAI(system,userMsg,key,attempt=1){
+  const txt=Array.isArray(userMsg)?userMsg.map(b=>b.type==='text'?b.text:'[image]').join('\n'):(typeof userMsg==='string'?userMsg:JSON.stringify(userMsg));
+  const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:PROVIDER_MODELS.openai,max_tokens:4000,messages:[{role:'system',content:system},{role:'user',content:txt}]})});
+  const data=await r.json();
+  if(data.error) throw new Error('OpenAI: '+(data.error.message||'API error'));
+  const text=data.choices?.[0]?.message?.content||'';
+  try{return parseJson(text);}catch(e){if(attempt<2)return _callOpenAI(system,userMsg+'\n\nIMPORTANT: ONE valid JSON only.',key,attempt+1);throw new Error('OpenAI parse failed');}
+}
+
+async function _callGroq(system,userMsg,key,attempt=1){
+  const txt=Array.isArray(userMsg)?userMsg.map(b=>b.type==='text'?b.text:'[image]').join('\n'):(typeof userMsg==='string'?userMsg:JSON.stringify(userMsg));
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:PROVIDER_MODELS.groq,max_tokens:4000,temperature:0.2,messages:[{role:'system',content:system},{role:'user',content:txt}]})});
+  const data=await r.json();
+  if(data.error) throw new Error('Groq: '+(data.error.message||'API error'));
+  const text=data.choices?.[0]?.message?.content||'';
+  try{return parseJson(text);}catch(e){if(attempt<2)return _callGroq(system,userMsg+'\n\nIMPORTANT: ONE valid JSON only.',key,attempt+1);throw new Error('Groq parse failed');}
+}
+
+function parseJson(text){
+  let c=text.replace(/```json|```/g,'').trim();
+  const s=c.indexOf('{'),e=c.lastIndexOf('}');
+  if(s<0||e<0)throw new Error('No JSON');
+  c=c.slice(s,e+1);
+  try{return JSON.parse(c);}catch(e){let f=c.replace(/,\s*([}\]])/g,'$1');return JSON.parse(f);}
+}
+
+async function callText(prompt){
+  const key=getKey(),prov=getProvider();
+  if(!key) throw new Error('API key needed');
+  if(prov==='groq'){
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:PROVIDER_MODELS.groq,max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();if(d.error)throw new Error(d.error.message);return d.choices?.[0]?.message?.content?.trim()||'';
+  }
+  if(prov==='gemini'){
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+PROVIDER_MODELS.gemini+':generateContent?key='+key,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+    const d=await r.json();if(d.error)throw new Error(d.error.message);return d.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||'';
+  }
+  if(prov==='openai'){
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:PROVIDER_MODELS.openai,max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();if(d.error)throw new Error(d.error.message);return d.choices?.[0]?.message?.content?.trim()||'';
+  }
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:PROVIDER_MODELS.claude,max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+  const d=await r.json();if(d.error)throw new Error(d.error.message);return (d.content||[]).map(i=>i.type==='text'?i.text:'').filter(Boolean).join('\n').trim();
+}
+
+/* ══ GENERATE / TRIM ══ */
+function showLoading(msg){document.getElementById('stageActs').innerHTML='';document.getElementById('output').innerHTML='<div class="spinner-wrap"><div class="spinner"></div><div class="load-txt">'+msg+'</div></div>';}
+function showError(e){document.getElementById('output').innerHTML='<div class="error-box"><b>பிழை · </b>'+esc(e.message)+'</div>';}
+async function copyText(btn,text){try{await navigator.clipboard.writeText(text);}catch(e){}const old=btn.textContent;btn.textContent='✓ Copied';btn.classList.add('done');setTimeout(()=>{btn.textContent=old;btn.classList.remove('done');},1400);}
+const fmtSec=s=>{s=Math.round(s||0);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+const wc=s=>(s||'').trim().split(/\s+/).filter(Boolean).length;
+
+function go(){mode==='generate'?generate():trim();}
+window.go=go;
+
+async function generate(){
+  const btype=pick('btChips'),fmt=pick('fmtChips'),dur=document.getElementById('targetDur').value,instr=document.getElementById('genInstr').value.trim();
+  let sourceBlock,useSearch=false,imageMode=false;
+  if(src==='raw'){const raw=document.getElementById('rawScript').value.trim();if(!raw){alert('Raw script paste பண்ணுங்க');return;}sourceBlock='RAW SOURCE SCRIPT:\n"""\n'+raw+'\n"""';}
+  else if(src==='url'){const url=document.getElementById('newsUrl').value.trim();if(!url){alert('URL கொடுங்க');return;}sourceBlock='SOURCE: '+url;useSearch=true;}
+  else{if(!imgB64){alert('Newspaper image upload பண்ணுங்க');return;}sourceBlock='SOURCE: Attached newspaper image.';imageMode=true;}
+  const userMsg=sourceBlock+'\n\nBULLETIN TYPE: '+btype+'\nFORMAT: '+fmt+'\nTARGET DURATION: '+dur+' seconds (~'+Math.round(dur*WPS)+' Tamil words)'+(instr?'\nINSTRUCTIONS: '+instr:'');
+  const btn=document.getElementById('goBtn');btn.disabled=true;
+  showLoading('WRITING BROADCAST SCRIPT ('+getProvider().toUpperCase()+')');
+  try{
+    if(imageMode&&getProvider()!=='claude') throw new Error('Newspaper Image mode currently works best with Claude. Switch provider to Claude.');
+    const payload=imageMode?[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:imgB64}},{type:'text',text:userMsg}]:userMsg;
+    const out=await callClaude(SYS,payload,useSearch);
+    lastOutput=out;renderRundown(out);
+  }catch(e){showError(e);}
+  btn.disabled=false;
+}
+
+function fullText(o){
+  let t='SLUG: '+o.slug+' ['+o.bulletin_type+'] DUR: '+fmtSec(o.total_duration_sec)+'\n';
+  if(o.mos_slug)t+='MOS: '+o.mos_slug+'\n\n';
+  if(o.anchor_lead)t+='[ANCHOR]\n'+o.anchor_lead+'\n\n';
+  (o.segments||[]).forEach(s=>{t+='['+s.type+(s.speaker?' — '+s.speaker:'')+']'+(s.duration_sec?' ('+fmtSec(s.duration_sec)+')':'')+'\n'+s.text+'\n';if(s.byte_in)t+='IN: "'+s.byte_in+'"  OUT: "'+s.byte_out+'"\n';t+='\n';});
+  if(o.ticker)t+='TICKER: '+o.ticker+'\n';
+  return t;
+}
+function renderRundown(o){
+  document.getElementById('stageActs').innerHTML='<button class="btn" onclick="copyText(this,fullText(lastOutput))">⧉ Copy all</button><button class="btn red" onclick="generate()">↻ Regen</button>';
+  let h='<div class="slugstrip"><span class="slug">'+esc(o.slug)+'</span><span class="btype">'+esc(o.bulletin_type)+'</span><span class="dur">'+fmtSec(o.total_duration_sec)+'<small>EST DUR</small></span></div>';
+  if(o.anchor_lead)h+=secCard('ANCHOR','ANCHOR',esc(o.anchor_lead),Math.round(wc(o.anchor_lead)/WPS),o.anchor_lead);
+  (o.segments||[]).forEach(s=>{
+    const t=(s.type||'VO').split(/[\s(+]/)[0].toUpperCase();
+    let body=esc(s.text);
+    if(s.byte_in)body+='<span class="cue">IN: "'+esc(s.byte_in)+'" → OUT: "'+esc(s.byte_out)+'"</span>';
+    h+=secCard(t,t+(s.speaker?' · '+esc(s.speaker):''),body,s.duration_sec,s.text+(s.byte_in?'\nIN: "'+s.byte_in+'"  OUT: "'+s.byte_out+'"':''));
+  });
+  if(o.mos_slug)h+='<div class="sec"><div class="sec-hd"><span class="rtag rt-MOS">MOS SLUG</span><button class="cpybtn" onclick=\'copyText(this,'+JSON.stringify(o.mos_slug)+')\'>Copy</button></div><div class="mos-block"><div class="mos-sent">'+esc(o.mos_slug)+'</div></div></div>';
+  if(o.ticker){
+    let parts=[],hdr=o.ticker;
+    if(o.ticker_header){hdr=o.ticker_header;parts=o.ticker_points||[];}
+    else if(o.ticker.includes('||')){const sp=o.ticker.split('||').map(x=>x.trim()).filter(Boolean);hdr=sp[0];parts=sp.slice(1);}
+    h+='<div class="sec"><div class="sec-hd"><span class="rtag rt-TICKER">TICKER</span><button class="cpybtn" onclick=\'copyText(this,'+JSON.stringify(o.ticker)+')\'>Copy</button></div><div class="mos-block"><div class="ticker-hd">'+esc(hdr)+'</div>'+(parts.length?'<ul class="ticker-pts">'+parts.map(p=>'<li>'+esc(p)+'</li>').join('')+'</ul>':'')+'</div></div>';
+  }
+  if(o.editor_note)h+='<div class="removed">✎ '+esc(o.editor_note)+'</div>';
+  document.getElementById('output').innerHTML=h;
+}
+function secCard(tag,title,bodyHtml,durSec,copySrc){
+  return '<div class="sec"><div class="sec-hd"><span class="rtag rt-'+tag+'">'+title+'</span>'+(durSec?'<span class="sdur">'+fmtSec(durSec)+'</span>':'')+'<button class="cpybtn" onclick=\'copyText(this,'+JSON.stringify(copySrc)+')\'>Copy</button></div><div class="sec-body">'+bodyHtml+'</div></div>';
+}
+
+async function trim(){
+  const s=document.getElementById('trimScript').value.trim();
+  if(!s){alert('Script paste பண்ணுங்க');return;}
+  const dur=document.getElementById('trimDur').value,instr=document.getElementById('trimInstr').value.trim();
+  const um='SCRIPT:\n"""\n'+s+'\n"""\n\nTARGET: '+dur+' seconds (~'+Math.round(dur*WPS)+' words)'+(instr?'\nINSTRUCTIONS: '+instr:'');
+  const btn=document.getElementById('goBtn');btn.disabled=true;
+  showLoading('TRIMMING ('+getProvider().toUpperCase()+')');
+  try{
+    const o=await callClaude(SYS_TRIM,um,false);
+    document.getElementById('stageActs').innerHTML='<button class="btn" id="tCpyBtn">⧉ Copy trimmed</button><button class="btn red" onclick="trim()">↻ Re-trim</button>';
+    document.getElementById('output').innerHTML='<div class="stat-row"><div class="stat"><div class="v">'+o.original_words+'</div><div class="l">ORIGINAL</div></div><div class="stat"><div class="v">'+o.trimmed_words+'</div><div class="l">TRIMMED</div></div><div class="stat"><div class="v">'+fmtSec(o.est_duration_sec)+'</div><div class="l">EST DUR</div></div></div><div class="sec"><div class="sec-hd"><span class="rtag rt-VO">TRIMMED SCRIPT</span></div><div class="sec-body">'+esc(o.trimmed_script)+'</div></div>'+(o.removed_summary?'<div class="removed">✂ '+esc(o.removed_summary)+'</div>':'');
+    document.getElementById('tCpyBtn').onclick=function(){copyText(this,o.trimmed_script);};
+  }catch(e){showError(e);}
+  btn.disabled=false;
+}
+
+/* ══ TRANSCRIBER ══ */
+let tFile=null, lastTranscript='';
+const dz=document.getElementById('dz'), tFileInp=document.getElementById('tFile');
+dz.addEventListener('click',()=>tFileInp.click());
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files.length)setTFile(e.dataTransfer.files[0]);});
+tFileInp.addEventListener('change',()=>{if(tFileInp.files.length)setTFile(tFileInp.files[0]);});
+
+function setTFile(f){
+  tFile=f;
+  document.getElementById('tFname').textContent='📎 '+f.name+' ('+Math.round(f.size/1024)+'KB)';
+  document.getElementById('tRunBtn').disabled=false;
+  document.getElementById('tOutArea').style.display='none';
+}
+function setTS(t,c){const el=document.getElementById('tStatus');el.textContent=t;el.className='t-status '+(c||'');}
+
+document.getElementById('tRunBtn').addEventListener('click',async()=>{
+  if(!tFile)return;
+  const btn=document.getElementById('tRunBtn');btn.disabled=true;
+  document.getElementById('tOutArea').style.display='none';
+  const spokenLang=document.getElementById('tSpokenLang').value;
+  const outputLang=document.getElementById('tOutputLang').value;
+  try{
+    setTS('Loading Whisper model… (first time takes a minute)','active');
+    const {pipeline}=await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+    const whisper=await pipeline('automatic-speech-recognition','Xenova/whisper-base');
+    setTS('Decoding audio…','active');
+    const ab=await tFile.arrayBuffer();
+    const ctx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
+    const decoded=await ctx.decodeAudioData(ab);
+    let data=decoded.getChannelData(0);
+    if(decoded.numberOfChannels>1){const c1=decoded.getChannelData(1);const c0=decoded.getChannelData(0);data=new Float32Array(c0.length);for(let i=0;i<data.length;i++)data[i]=(c0[i]+c1[i])/2;}
+    setTS('Transcribing…','active');
+    const opts={chunk_length_s:20,stride_length_s:3,task:'transcribe'};
+    if(spokenLang!=='auto')opts.language=spokenLang;
+    const result=await whisper(data,opts);
+    lastTranscript=result.text.trim();
+    let finalText=lastTranscript;
+    if(outputLang==='ta'||outputLang==='en'){
+      setTS('Translating via '+getProvider().toUpperCase()+'…','active');
+      const prompt=outputLang==='ta'?'Translate to Tamil broadcast text. Output ONLY Tamil:\n\n'+lastTranscript:'Translate to English. Output ONLY the translation:\n\n'+lastTranscript;
+      finalText=await callText(prompt);
+    }
+    document.getElementById('tBox').textContent=finalText;
+    document.getElementById('tOutArea').style.display='block';
+    setTS('✓ Done','done');
+  }catch(err){setTS('Error: '+err.message,'err');}
+  btn.disabled=false;
+});
+
+window.copyTranscript=()=>{navigator.clipboard.writeText(document.getElementById('tBox').textContent);};
+window.sendToNewsGen=()=>{
+  const txt=document.getElementById('tBox').textContent;
+  if(!txt)return;
+  document.getElementById('rawScript').value=txt;
+  setSrc('raw');gotoPage('newsgen');setMode('generate');
+};
+
+/* ══ SELECTION COUNTER ══ */
+document.addEventListener('selectionchange',()=>{
+  const t=(window.getSelection()||'').toString().trim();
+  const b=document.getElementById('selBadge');
+  if(!t){b.style.display='none';return;}
+  const w=t.split(/\s+/).filter(Boolean).length;
+  b.textContent=w+' words · '+Math.round(w/WPS)+' sec';
+  b.style.display='block';
+});
+</script>
+</body>
+</html>
