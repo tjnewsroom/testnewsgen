@@ -475,7 +475,7 @@ window.gotoPage = gotoPage;
 const getKey=()=>document.getElementById('apiKey').value.trim();
 const getProvider=()=>document.getElementById('apiProvider').value;
 const PROVIDER_HINTS={claude:'console.anthropic.com → API Keys',gemini:'aistudio.google.com → Get API Key',openai:'platform.openai.com → API Keys',groq:'console.groq.com → API Keys'};
-const PROVIDER_MODELS={claude:'claude-sonnet-4-6',gemini:'gemini-2.0-flash',openai:'gpt-4o-mini',groq:'llama-3.3-70b-versatile'};
+const PROVIDER_MODELS={claude:'claude-sonnet-4-6',gemini:'gemini-2.0-flash',openai:'gpt-4o-mini',groq:'openai/gpt-oss-120b'};
 
 function updateProviderHint(){
   const p=getProvider();
