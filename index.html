@@ -993,7 +993,7 @@ const PROVIDER_HINTS={
   claude:'console.anthropic.com → API Keys (sk-ant-...)',
   gemini:'aistudio.google.com → Get API Key (AIza...)',
   openai:'platform.openai.com → API Keys (sk-...)',
-  groq:'console.groq.com → API Keys (gsk_...)'
+  groq:'console.groq.com → API Keys (gsk_...)',
 };
 function updateProviderHint(){
   const p=getProvider();
@@ -1007,7 +1007,7 @@ const PROVIDER_MODELS={
   claude:'claude-sonnet-4-6',
   gemini:'gemini-2.0-flash',
   openai:'gpt-4o-mini',
-  groq:'openai/gpt-oss-120b'
+  groq:'openai/gpt-oss-120b',
 };
 
 function updateProviderHint(){
@@ -1021,7 +1021,7 @@ function updateProviderHint(){
       claude: 'sk-ant-api03-...',
       gemini: 'AIza...',
       openai: 'sk-...',
-      groq:   'gsk_...'               // ← ADD THIS
+      groq:   'gsk_...',               // ← ADD THIS
     }[p] || 'API key...';
   }
   setApiStatus();
@@ -1035,7 +1035,7 @@ function setApiStatus(){
     (prov==='claude'&&k.startsWith('sk-ant'))||
     (prov==='gemini'&&k.startsWith('AIza'))||
     (prov==='openai'&&k.startsWith('sk-'))||
-    (prov === 'groq'   && k.startsWith('gsk_')) ||
+    (prov === 'groq'&& k.startsWith('gsk_'))||
     k.length>10
   );
   if(valid){p.className='status-pill ok';t.textContent=getProvider().toUpperCase()+' READY';}
