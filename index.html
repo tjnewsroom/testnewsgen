@@ -1007,7 +1007,7 @@ const PROVIDER_MODELS={
   claude:'claude-sonnet-4-6',
   gemini:'gemini-2.0-flash',
   openai:'gpt-4o-mini'
-  groq:   'openai/gpt-oss-120b'
+  groq:'openai/gpt-oss-120b'
 };
 
 function updateProviderHint(){
@@ -1197,7 +1197,7 @@ async function _callGroq(system, userMsg, key, attempt = 1) {
       'Authorization': 'Bearer ' + key
     },
     body: JSON.stringify({
-      model: PROVIDER_MODELS.groq,          // openai/gpt-oss-120b
+      model: 'openai/gpt-oss-120b',   // current working model
       max_tokens: 4000,
       temperature: 0.2,
       messages: [
@@ -1208,16 +1208,20 @@ async function _callGroq(system, userMsg, key, attempt = 1) {
   });
 
   const data = await r.json();
-  if (data.error) throw new Error('Groq: ' + (data.error.message || 'API error'));
+  
+  if (data.error) {
+    throw new Error('Groq: ' + (data.error.message || 'API error'));
+  }
 
   const text = data.choices?.[0]?.message?.content || '';
+  
   try {
     return parseJson(text);
   } catch (e) {
     if (attempt < 2) {
-      return _callGroq(system, userMsg + '\n\nIMPORTANT: ONE valid JSON only, no markdown.', key, attempt + 1);
+      return _callGroq(system, userMsg + '\n\nIMPORTANT: Respond with ONE valid JSON only, no markdown.', key, attempt + 1);
     }
-    throw new Error('Groq parse failed: ' + e.message);
+    throw new Error('Groq JSON parse failed: ' + e.message + '\n\nRaw response:\n' + text.slice(0, 500));
   }
 }
 
