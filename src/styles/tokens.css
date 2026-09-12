@@ -64,7 +64,7 @@ body {
   background: var(--bone);
   color: var(--ink);
   font-family: var(--f-ui);
-  font-size: 14px;
+  font-size: 15px;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
 }
