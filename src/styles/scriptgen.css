@@ -304,3 +304,21 @@ textarea { resize: vertical; min-height: 108px; line-height: 1.7; }
   .sg-rail { width: 100%; border-right: none; border-bottom: 1px solid var(--line); }
   .sg-rail-scroll { max-height: 60vh; }
 }
+
+@media (max-width: 620px) {
+  .sg-rail-scroll { padding: 14px; max-height: none; }
+  .sg-rail-foot { padding: 12px 14px; }
+  .sg-stage-head { padding: 10px 14px; flex-wrap: wrap; }
+  .sg-stage-acts { width: 100%; margin-left: 0; }
+  .sg-stage-acts .btn { flex: 1; justify-content: center; }
+  .sg-stage-body { padding: 14px; }
+  .sg-flow { flex-direction: column; }
+  .sg-flow-step:first-child, .sg-flow-step:last-child { border-radius: 0; }
+  .sg-flow-step:first-child { border-radius: 10px 10px 0 0; }
+  .sg-flow-step:last-child { border-radius: 0 0 10px 10px; }
+  .sg-flow-step + .sg-flow-step { border-left: 1px solid var(--line); border-top: none; }
+  .sg-stat-row { gap: 6px; }
+  .sg-stat { padding: 10px 6px; }
+  .sg-slugstrip { align-items: flex-start; flex-wrap: wrap; }
+  .sg-slugstrip .dur { margin-left: 0; width: 100%; text-align: left; }
+}

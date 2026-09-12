@@ -71,6 +71,11 @@
 .wm-page-label { font-family: var(--f-mono); font-size: 11px; color: var(--ink-dim); }
 
 @media (max-width: 620px) {
+  .wm-wrap { padding-inline: 14px; }
   .wm-header { flex-wrap: wrap; gap: 8px; }
   .wm-title { font-size: 16px; }
+  .wm-stats { width: 100%; margin-left: 0; }
+  .wm-fresh-select { margin-left: 0; width: 100%; }
+  .wm-card { padding: 10px 12px; }
+  .wm-time { margin-left: 0; }
 }
