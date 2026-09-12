@@ -1,0 +1,92 @@
+.tr-page { background: var(--bone); overflow-y: auto; flex-direction: column; align-items: center; width: 100%; }
+
+.tr-wrap { width: 100%; max-width: 780px; padding: 26px 20px 60px; }
+.tr-title { font-size: 21px; font-weight: 700; margin-bottom: 5px; }
+.tr-sub { font-size: 13px; color: var(--ink-dim); margin-bottom: 24px; }
+
+.tr-panel { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 22px; margin-bottom: 16px; }
+.tr-panel h2 { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 16px; }
+
+.tr-mode-tabs { display: flex; gap: 6px; margin-bottom: 18px; background: var(--sunken); border: 1px solid var(--line); border-radius: 11px; padding: 3px; width: fit-content; }
+.tr-mode-tabs button { border: none; background: none; padding: 8px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--ink-dim); }
+.tr-mode-tabs button.on { background: var(--ready); color: #fff; }
+
+.tr-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.tr-field { flex: 1; min-width: 150px; }
+.tr-field label { display: block; font-size: 11.5px; color: var(--ink-dim); margin-bottom: 5px; font-weight: 500; }
+
+select { width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-sm); color: var(--ink); padding: 9px 11px; font-size: 13px; }
+
+.tr-dropzone {
+  border: 2px dashed var(--line);
+  border-radius: var(--r);
+  background: var(--panel);
+  text-align: center;
+  padding: 34px 16px;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-bottom: 12px;
+}
+.tr-dropzone:hover, .tr-dropzone.drag { border-color: var(--ready); background: var(--ready-tint); }
+.tr-dropzone .ico { font-size: 30px; margin-bottom: 8px; }
+.tr-dropzone .t { font-size: 13.5px; color: var(--ink-dim); font-weight: 500; }
+.tr-dropzone .s { font-size: 11.5px; color: var(--ink-faint); margin-top: 4px; }
+.tr-fname { font-family: var(--f-mono); font-size: 12px; color: var(--ink-dim); margin-bottom: 12px; }
+
+.tr-run-btn {
+  padding: 12px 22px;
+  border: none;
+  border-radius: 10px;
+  background: var(--ready);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  width: 100%;
+}
+.tr-run-btn:disabled { background: #B7B2A4; cursor: default; }
+
+.tr-status { font-size: 12.5px; margin-top: 12px; padding: 9px 12px; border-radius: 8px; background: var(--sunken); color: var(--ink-dim); }
+.tr-status.active { background: var(--wire-tint); color: var(--wire); }
+.tr-status.done { background: var(--ready-tint); color: var(--ready); }
+.tr-status.err { background: var(--tally-tint); color: var(--tally-deep); }
+
+.tr-prog { height: 6px; background: var(--sunken); border-radius: 20px; overflow: hidden; margin: 8px 0; }
+.tr-prog-fill { height: 100%; background: linear-gradient(90deg, var(--ready), var(--wire)); border-radius: 20px; transition: width 0.4s; }
+
+.tr-out-cols { display: flex; gap: 12px; margin: 14px 0; flex-wrap: wrap; }
+.tr-out-half { flex: 1; min-width: 240px; }
+.tr-out-half-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; color: var(--ink-faint); margin-bottom: 6px; }
+.tr-out-half-label.translated { color: var(--wire); }
+.tr-box { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; font-family: var(--f-tamil); font-size: 14px; line-height: 1.75; white-space: pre-wrap; max-height: 240px; overflow-y: auto; }
+
+.tr-onair-section { margin-top: 16px; }
+.tr-onair-label { font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+.tr-onair-hint { font-weight: 400; color: var(--ink-faint); font-size: 11px; }
+.tr-onair-box { min-height: 130px; font-family: var(--f-tamil); font-size: 14.5px; line-height: 1.8; }
+
+.tr-copy-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.tr-copy-row button { padding: 8px 13px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--paper); color: var(--ink-dim); font-size: 12px; font-weight: 600; }
+.tr-copy-row button.primary { border-color: var(--tally-line); color: var(--tally); background: var(--tally-tint); }
+.tr-copy-row button.send { border-color: var(--ready-line); color: var(--ready); background: var(--ready-tint); font-weight: 700; }
+
+.tr-mic-controls { display: flex; gap: 10px; margin-bottom: 12px; }
+.tr-mic-controls button { flex: 1; padding: 13px; border: none; border-radius: 10px; background: var(--ready); color: #fff; font-weight: 700; font-size: 13.5px; }
+.tr-mic-controls button.stop { background: var(--tally); }
+
+.tr-mic-viz { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.tr-mic-bars { display: flex; align-items: flex-end; gap: 3px; height: 34px; }
+.tr-mic-bar { width: 4px; border-radius: 2px; background: var(--ready); transition: height 0.08s; }
+
+.tr-live-feed { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; margin-top: 10px; }
+.tr-live-feed-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--sunken); border-bottom: 1px solid var(--line); }
+.tr-live-feed-header .lbl { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.8px; color: var(--ink-dim); }
+.tr-live-feed-header button { border: none; background: none; color: var(--ink-faint); font-size: 11px; }
+.tr-live-feed-scroll { overflow-y: auto; max-height: 260px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.tr-live-chunk { border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+.tr-live-chunk-orig { font-size: 12px; color: var(--ink-dim); padding: 6px 10px; background: var(--paper); }
+.tr-live-chunk-tamil { font-family: var(--f-tamil); font-size: 14px; color: var(--ink); padding: 8px 10px; background: var(--wire-tint); line-height: 1.7; font-weight: 500; }
+.tr-live-chunk-time { font-family: var(--f-mono); font-size: 9px; color: var(--ink-faint); padding: 3px 10px 6px; background: var(--paper); }
+
+.tr-note { font-size: 11.5px; color: var(--ink-faint); text-align: center; margin-top: 10px; line-height: 1.6; }
+
+.tr-hint-note { font-size: 11px; color: var(--ink-faint); margin-top: 6px; padding: 8px 10px; background: var(--panel); border-radius: 6px; border-left: 2px solid var(--line); line-height: 1.5; }

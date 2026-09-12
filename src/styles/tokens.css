@@ -1,0 +1,101 @@
+:root {
+  /* ── surfaces ── */
+  --bone: #F5F2EC;
+  --paper: #FFFFFF;
+  --panel: #FBF9F5;
+  --sunken: #EFEBE2;
+  --line: #E2DCCE;
+  --line-soft: #EBE6DA;
+
+  /* ── ink ── */
+  --ink: #1B1F24;
+  --ink-dim: #5B6472;
+  --ink-faint: #93917F;
+
+  /* ── signal colors (broadcast tally-light system) ── */
+  --tally: #D6331F;         /* on-air / breaking */
+  --tally-deep: #AD2718;
+  --tally-tint: #FBEBE7;
+  --tally-line: #F0C3B7;
+
+  --standby: #B9791F;       /* amber — pending / standby */
+  --standby-tint: #FAF0DE;
+  --standby-line: #EBD3A0;
+
+  --ready: #1F7A5C;         /* emerald — good / ready */
+  --ready-tint: #E7F3EC;
+  --ready-line: #B7DBC9;
+
+  --wire: #2A5C8A;          /* deep newsroom blue — links / info */
+  --wire-tint: #E9F1F8;
+  --wire-line: #BFD9EC;
+
+  --archive: #6B4C86;       /* violet — meta / MOS */
+  --archive-tint: #F1EBF4;
+  --archive-line: #D8C5E1;
+
+  --tamil-flag: #C25A16;    /* burnt orange — tamil-source stories */
+  --tamil-tint: #FCEEE2;
+  --tamil-line: #F0C89D;
+
+  /* ── type ── */
+  --f-ui: 'Public Sans', -apple-system, 'Segoe UI', sans-serif;
+  --f-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+  --f-tamil: 'Noto Sans Tamil', 'Nirmala UI', sans-serif;
+
+  /* ── shape ── */
+  --r-sm: 6px;
+  --r: 9px;
+  --r-lg: 14px;
+
+  /* ── shadow (single, disciplined system — not per-card) ── */
+  --sh-1: 0 1px 2px rgba(27, 31, 36, 0.06);
+  --sh-2: 0 3px 10px rgba(27, 31, 36, 0.08);
+  --sh-3: 0 10px 30px rgba(27, 31, 36, 0.12);
+
+  color-scheme: light;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  background: var(--bone);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+  color: inherit;
+}
+
+button { cursor: pointer; }
+
+::selection { background: rgba(42, 92, 138, 0.18); }
+
+/* focus visibility, kept even where we suppress the default outline look */
+:focus-visible {
+  outline: 2px solid var(--wire);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@keyframes tally-pulse {
+  50% { opacity: 0.35; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
