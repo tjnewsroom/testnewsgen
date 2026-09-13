@@ -5,7 +5,7 @@ const ApiKeyContext = createContext(null);
 
 export function ApiKeyProvider({ children }) {
   const [provider, setProvider] = useState(() => {
-    try { return localStorage.getItem('tj_provider') || 'claude'; } catch { return 'claude'; }
+    try { return localStorage.getItem('tj_provider') || 'groq'; } catch { return 'groq'; }
   });
   const [key, setKey] = useState(() => {
     try { return localStorage.getItem('tj_key') || ''; } catch { return ''; }

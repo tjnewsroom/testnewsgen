@@ -1,7 +1,7 @@
 const NAV = [
-  { id: 'newsgen', label: 'Script Generator', icon: '⏺', tone: 'tally' },
-  { id: 'transcriber', label: 'Transcriber', icon: '🎙', tone: 'ready' },
-  { id: 'monitor', label: 'World Monitor', icon: '🌍', tone: 'archive' },
+  { id: 'newsgen', label: 'Script Generator', icon: '⏺' },
+  { id: 'transcriber', label: 'Transcriber', icon: '🎙' },
+  { id: 'monitor', label: 'World Monitor', icon: '🌍' },
 ];
 
 export default function TopBar({ page, onNavigate, mode, onModeChange }) {
@@ -19,7 +19,7 @@ export default function TopBar({ page, onNavigate, mode, onModeChange }) {
         {NAV.map((n) => (
           <button
             key={n.id}
-            className={`nav-pill ${page === n.id ? `on tone-${n.tone}` : ''}`}
+            className={`nav-pill ${page === n.id ? 'on' : ''}`}
             onClick={() => onNavigate(n.id)}
           >
             <span aria-hidden="true">{n.icon}</span> {n.label}

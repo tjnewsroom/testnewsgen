@@ -71,11 +71,18 @@
 .wm-page-label { font-family: var(--f-mono); font-size: 11px; color: var(--ink-dim); }
 
 @media (max-width: 620px) {
-  .wm-wrap { padding-inline: 14px; }
   .wm-header { flex-wrap: wrap; gap: 8px; }
   .wm-title { font-size: 16px; }
-  .wm-stats { width: 100%; margin-left: 0; }
+}
+
+@media (max-width: 760px) {
+  .wm-page { overflow: visible; height: auto; }
+  .wm-wrap { padding: 0 14px 40px; }
+  .wm-break-banner { margin: 0 -14px; width: calc(100% + 28px); font-size: 12px; }
+  .wm-sticky { position: static; padding: 12px 0 8px; }
+  .wm-stats { margin-left: 0; width: 100%; order: 5; }
   .wm-fresh-select { margin-left: 0; width: 100%; }
-  .wm-card { padding: 10px 12px; }
-  .wm-time { margin-left: 0; }
+  .wm-card-desc { -webkit-line-clamp: 3; }
+  .wm-pagination { flex-wrap: wrap; justify-content: center; }
+  .wm-page-label { order: 3; width: 100%; text-align: center; }
 }

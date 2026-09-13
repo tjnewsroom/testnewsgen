@@ -17,6 +17,13 @@ export const PROVIDER_PLACEHOLDERS = {
   groq: 'gsk_...',
 };
 
+export const PROVIDER_CONSOLE_URLS = {
+  claude: 'https://console.anthropic.com/settings/keys',
+  gemini: 'https://aistudio.google.com/apikey',
+  openai: 'https://platform.openai.com/api-keys',
+  groq: 'https://console.groq.com/keys',
+};
+
 export const PROVIDER_MODELS = {
   claude: 'claude-sonnet-4-6',
   gemini: 'gemini-2.0-flash',

@@ -1,42 +1,43 @@
 :root {
-  /* ── surfaces ── */
-  --bone: #F3F7FB;
+  /* ── surfaces (cool blue-white desk) ── */
+  --bone: #EEF3F9;
   --paper: #FFFFFF;
-  --panel: #F8FBFE;
-  --sunken: #EAF2FA;
-  --line: #D5E2EE;
-  --line-soft: #E6EEF5;
+  --panel: #F5F9FD;
+  --sunken: #E6EDF6;
+  --line: #D7E1EE;
+  --line-soft: #E3EAF3;
 
   /* ── ink ── */
-  --ink: #14263A;
-  --ink-dim: #526579;
-  --ink-faint: #8293A3;
+  --ink: #16202E;
+  --ink-dim: #55647A;
+  --ink-faint: #8C99AD;
 
   /* ── signal colors (broadcast tally-light system) ── */
-  --tally: #1769D1;         /* primary action / on-air */
-  --tally-deep: #0D4FA3;
-  --tally-tint: #EAF3FF;
-  --tally-line: #B9D5F5;
+  --tally: #1D5FA8;         /* primary action blue (was red — now unified blue/white) */
+  --tally-deep: #164E8C;
+  --tally-tint: #E7F1FB;
+  --tally-line: #BAD5EF;
 
-  --standby: #55738F;       /* slate blue — pending / standby */
-  --standby-tint: #EDF4F9;
-  --standby-line: #C7D9E8;
+  --standby: #B9791F;       /* amber — pending / standby */
+  --standby-tint: #FAF0DE;
+  --standby-line: #EBD3A0;
 
-  --ready: #087F72;         /* teal — good / ready */
-  --ready-tint: #E5F5F2;
-  --ready-line: #B4DED8;
+  --ready: #1F7A5C;         /* emerald — good / ready */
+  --ready-tint: #E7F3EC;
+  --ready-line: #B7DBC9;
 
-  --wire: #1769D1;          /* professional blue — links / info */
-  --wire-tint: #EAF3FF;
-  --wire-line: #B9D5F5;
+  --wire: #1D5FA8;          /* primary blue — the app's main interactive color */
+  --wire-deep: #164E8C;
+  --wire-tint: #E7F1FB;
+  --wire-line: #BAD5EF;
 
-  --archive: #496A9A;       /* muted blue — meta / MOS */
-  --archive-tint: #EDF2FA;
-  --archive-line: #C8D5E8;
+  --archive: #6B4C86;       /* violet — meta / MOS */
+  --archive-tint: #F1EBF4;
+  --archive-line: #D8C5E1;
 
-  --tamil-flag: #1473A8;    /* ocean blue — tamil-source stories */
-  --tamil-tint: #E9F4FA;
-  --tamil-line: #B8DCEB;
+  --tamil-flag: #C25A16;    /* burnt orange — tamil-source stories */
+  --tamil-tint: #FCEEE2;
+  --tamil-line: #F0C89D;
 
   /* ── type ── */
   --f-ui: 'Public Sans', -apple-system, 'Segoe UI', sans-serif;
@@ -49,9 +50,9 @@
   --r-lg: 14px;
 
   /* ── shadow (single, disciplined system — not per-card) ── */
-  --sh-1: 0 1px 2px rgba(20, 38, 58, 0.06);
-  --sh-2: 0 3px 10px rgba(20, 38, 58, 0.08);
-  --sh-3: 0 10px 30px rgba(20, 38, 58, 0.12);
+  --sh-1: 0 1px 2px rgba(22, 32, 46, 0.06);
+  --sh-2: 0 3px 10px rgba(22, 32, 46, 0.08);
+  --sh-3: 0 10px 30px rgba(22, 32, 46, 0.12);
 
   color-scheme: light;
 }
@@ -64,7 +65,7 @@ body {
   background: var(--bone);
   color: var(--ink);
   font-family: var(--f-ui);
-  font-size: 15px;
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
 }

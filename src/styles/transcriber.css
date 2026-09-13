@@ -91,12 +91,13 @@ select { width: 100%; background: var(--panel); border: 1px solid var(--line); b
 
 .tr-hint-note { font-size: 11px; color: var(--ink-faint); margin-top: 6px; padding: 8px 10px; background: var(--panel); border-radius: 6px; border-left: 2px solid var(--line); line-height: 1.5; }
 
-@media (max-width: 620px) {
-  .tr-wrap { padding: 18px 14px 40px; }
-  .tr-title { font-size: 19px; }
-  .tr-panel { padding: 16px; border-radius: 10px; }
-  .tr-mode-tabs { width: 100%; }
-  .tr-mode-tabs button { flex: 1; padding-inline: 8px; }
-  .tr-out-half { min-width: 100%; }
-  .tr-mic-controls { flex-direction: column; }
+@media (max-width: 760px) {
+  .tr-page { overflow: visible; height: auto; }
+  .tr-wrap { padding: 16px 14px 40px; }
+  .tr-panel { padding: 16px; }
+  .tr-row { flex-direction: column; gap: 10px; }
+  .tr-field { min-width: 0; }
+  .tr-out-cols { flex-direction: column; }
+  .tr-copy-row button { flex: 1; min-width: 0; }
+  .tr-mic-controls button { font-size: 12.5px; padding: 12px 8px; }
 }

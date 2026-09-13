@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PROVIDER_HINTS, PROVIDER_PLACEHOLDERS } from '../lib/llmProviders';
+import { PROVIDER_HINTS, PROVIDER_PLACEHOLDERS, PROVIDER_CONSOLE_URLS } from '../lib/llmProviders';
 import { useApiKeyStore } from '../hooks/useApiKeyStore';
 
 export default function ApiKeyBar() {
@@ -18,10 +18,10 @@ export default function ApiKeyBar() {
     <div className="apikey-bar">
       <label>PROVIDER</label>
       <select value={localProvider} onChange={(e) => setLocalProvider(e.target.value)}>
+        <option value="groq">Groq — very fast + free tier</option>
         <option value="claude">Claude (Anthropic)</option>
         <option value="gemini">Gemini (Google) — free tier</option>
         <option value="openai">ChatGPT (OpenAI)</option>
-        <option value="groq">Groq — very fast + free tier</option>
       </select>
       <input
         type="password"
@@ -29,6 +29,14 @@ export default function ApiKeyBar() {
         onChange={(e) => setLocalKey(e.target.value)}
         placeholder={PROVIDER_PLACEHOLDERS[localProvider] || 'API key...'}
       />
+      <button
+        type="button"
+        className="create-btn"
+        onClick={() => window.open(PROVIDER_CONSOLE_URLS[localProvider], '_blank', 'noopener,noreferrer')}
+        title={`Open ${PROVIDER_CONSOLE_URLS[localProvider]} in a new tab`}
+      >
+        ↗ Create API Key
+      </button>
       <button className="save-btn" onClick={() => save(localKey, localProvider)}>
         {dirty ? 'Save' : 'Saved'}
       </button>
@@ -40,3 +48,4 @@ export default function ApiKeyBar() {
     </div>
   );
 }
+

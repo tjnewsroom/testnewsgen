@@ -2,11 +2,11 @@ import { useMonitor } from '../../hooks/useMonitor';
 import { timeAgo, fetchArticleText } from '../../lib/monitorFeeds';
 
 const PRI_COLORS = {
-  BREAKING: { bg: '#FBEBE7', border: '#D6331F', badge: '#D6331F', badgeBg: '#F6D7D0' },
+  BREAKING: { bg: '#E7F1FB', border: '#164E8C', badge: '#164E8C', badgeBg: '#CFE1F5' },
   TAMIL: { bg: '#FCEEE2', border: '#C25A16', badge: '#C25A16', badgeBg: '#F5D8BB' },
   INDIA: { bg: '#E9F1F8', border: '#2A5C8A', badge: '#2A5C8A', badgeBg: '#CFE1EF' },
   HIGH: { bg: '#E7F3EC', border: '#1F7A5C', badge: '#1F7A5C', badgeBg: '#CBE8D8' },
-  NORMAL: { bg: '#FFFFFF', border: '#E2DCCE', badge: '#5B6472', badgeBg: '#EFEBE2' },
+  NORMAL: { bg: '#FFFFFF', border: '#D7E1EE', badge: '#55647A', badgeBg: '#E6EDF6' },
 };
 
 const FILTERS = [
