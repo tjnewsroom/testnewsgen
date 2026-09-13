@@ -28,6 +28,7 @@ export default function ScriptGenerator({ mode, setMode, incoming }) {
 
   // ── correction panel editable copy ──
   const [correctionSeed, setCorrectionSeed] = useState(null); // { rawSrc, scriptText, fmt, bt }
+  const [editedText, setEditedText] = useState('');
 
   const lastIncomingTs = useRef(0);
   useEffect(() => {
@@ -45,6 +46,7 @@ export default function ScriptGenerator({ mode, setMode, incoming }) {
       const scriptText = buildEditableScript(out);
       const rawSrc = source === 'raw' ? rawScript : source === 'url' ? url : '(image)';
       setCorrectionSeed({ rawSrc, scriptText, fmt: format, bt: bulletinType });
+      setEditedText(scriptText);
     } catch {
       /* error surfaced via gen.error, shown in Stage */
     }
@@ -89,9 +91,9 @@ export default function ScriptGenerator({ mode, setMode, incoming }) {
         loading={gen.loading}
         onGo={go}
       />
-      <Stage mode={mode} gen={gen} onRegenerate={runGenerate} onRetrim={runTrim} />
+      <Stage mode={mode} gen={gen} editableText={editedText} setEditableText={setEditedText} onRegenerate={runGenerate} onRetrim={runTrim} />
       {mode === 'generate' && (
-        <CorrectionPanel seed={correctionSeed} cl={cl} />
+        <CorrectionPanel seed={correctionSeed} cl={cl} editText={editedText} setEditText={setEditedText} />
       )}
     </div>
   );

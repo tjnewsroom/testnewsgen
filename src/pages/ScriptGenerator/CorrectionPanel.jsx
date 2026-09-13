@@ -8,8 +8,7 @@ function barColor(pct) {
   return 'var(--archive)';
 }
 
-export default function CorrectionPanel({ seed, cl }) {
-  const [editText, setEditText] = useState('');
+export default function CorrectionPanel({ seed, cl, editText, setEditText }) {
   const [original, setOriginal] = useState('');
   const [savedFlash, setSavedFlash] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -19,7 +18,7 @@ export default function CorrectionPanel({ seed, cl }) {
       setEditText(seed.scriptText);
       setOriginal(seed.scriptText);
     }
-  }, [seed]);
+  }, [seed, setEditText]);
 
   if (!seed) {
     return (

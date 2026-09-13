@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { fmtSec, wc, WPS } from '../../lib/prompts';
 import { fullText } from '../../hooks/useGenerator';
 
@@ -133,9 +133,48 @@ function TrimOutput({ result }) {
   );
 }
 
-export default function Stage({ mode, gen, onRegenerate, onRetrim }) {
+export default function Stage({ mode, gen, editableText, setEditableText, onRegenerate, onRetrim }) {
   const { output, trimResult, loading, loadingLabel, error } = gen;
+  const [editing, setEditing] = useState(false);
+  const [fileMessage, setFileMessage] = useState('');
+  const fileInput = useRef(null);
   const hasOutput = mode === 'generate' ? !!output : !!trimResult;
+
+  const saveHtml = () => {
+    const title = output?.slug || 'TJ NewsGen script';
+    const escaped = (editableText || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const html = '<!doctype html><html><head><meta charset="utf-8"><title>' + title + '</title>' +
+      '<style>body{font-family:Georgia,serif;max-width:820px;margin:40px auto;padding:0 20px;color:#20231f;line-height:1.7;white-space:pre-wrap}h1{font:700 20px sans-serif;border-bottom:2px solid #d6331f;padding-bottom:12px}</style></head><body><h1>' +
+      title.replace(/[&<>]/g, '') + '</h1><main data-tj-newsgen-script="1">' + escaped + '</main></body></html>';
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+    link.download = (title.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'tj-newsgen-script') + '.html';
+    link.click();
+    URL.revokeObjectURL(link.href);
+    setFileMessage('HTML saved');
+    setTimeout(() => setFileMessage(''), 1800);
+  };
+
+  const openHtml = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const doc = new DOMParser().parseFromString(String(reader.result), 'text/html');
+      const saved = doc.querySelector('[data-tj-newsgen-script="1"]') || doc.querySelector('main');
+      const text = saved?.textContent?.trim();
+      if (!text) {
+        setFileMessage('No script found');
+        return;
+      }
+      setEditableText(text);
+      setEditing(true);
+      setFileMessage('Script opened');
+      setTimeout(() => setFileMessage(''), 1800);
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  };
 
   return (
     <main className="sg-stage">
@@ -145,6 +184,7 @@ export default function Stage({ mode, gen, onRegenerate, onRetrim }) {
           {mode === 'generate' && output && !loading && (
             <>
               <CopyButton text={fullText(output)} className="btn">⧉ Copy all</CopyButton>
+              <button className={`btn ${editing ? 'tally' : ''}`} onClick={() => setEditing((v) => !v)}>{editing ? '✓ Done editing' : '✎ Edit'}</button>
               <button className="btn tally" onClick={onRegenerate}>↻ Regen</button>
             </>
           )}
@@ -154,7 +194,11 @@ export default function Stage({ mode, gen, onRegenerate, onRetrim }) {
               <button className="btn tally" onClick={onRetrim}>↻ Re-trim</button>
             </>
           )}
+          <button className="btn" onClick={() => fileInput.current?.click()}>↥ Open HTML</button>
+          <button className="btn" disabled={!editableText} onClick={saveHtml}>↓ Save HTML</button>
+          <input ref={fileInput} type="file" accept=".html,.htm,text/html" onChange={openHtml} hidden />
         </div>
+        {fileMessage && <span className="sg-file-message">{fileMessage}</span>}
       </div>
       <div className="sg-stage-body">
         {loading && (
@@ -166,7 +210,9 @@ export default function Stage({ mode, gen, onRegenerate, onRetrim }) {
         {!loading && error && (
           <div className="sg-error"><b>பிழை · </b>{error.message}</div>
         )}
-        {!loading && !error && hasOutput && (mode === 'generate' ? <Rundown output={output} /> : <TrimOutput result={trimResult} />)}
+        {!loading && !error && hasOutput && (editing ? (
+          <textarea className="sg-main-editor" value={editableText} onChange={(e) => setEditableText(e.target.value)} />
+        ) : mode === 'generate' ? <Rundown output={output} /> : <TrimOutput result={trimResult} />)}
         {!loading && !error && !hasOutput && (
           <div className="sg-empty">
             <div className="mark">— STANDBY —</div>

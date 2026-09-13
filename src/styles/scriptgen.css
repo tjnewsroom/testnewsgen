@@ -159,6 +159,7 @@ textarea { resize: vertical; min-height: 108px; line-height: 1.7; }
 }
 .sg-stage-head .t { font-size: 13px; font-weight: 700; color: var(--ink); }
 .sg-stage-acts { margin-left: auto; display: flex; gap: 7px; }
+.sg-file-message { position: absolute; right: 20px; top: 49px; font-size: 11px; color: var(--ready); }
 
 .btn {
   padding: 7px 13px;
@@ -179,6 +180,7 @@ textarea { resize: vertical; min-height: 108px; line-height: 1.7; }
 .btn.done { color: var(--ready); border-color: var(--ready-line); background: var(--ready-tint); }
 
 .sg-stage-body { padding: 20px; max-width: 880px; width: 100%; margin: 0 auto; }
+.sg-main-editor { min-height: 560px; width: 100%; padding: 22px; background: var(--paper); border: 1px solid var(--wire-line); border-radius: 12px; font-size: 16px; line-height: 1.8; }
 
 /* empty state */
 .sg-empty { margin: 40px auto; max-width: 560px; text-align: center; }
